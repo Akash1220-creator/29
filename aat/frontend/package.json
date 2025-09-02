@@ -9,13 +9,13 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
-  
-   "proxy": "http://localhost:4001",
-
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^39.0.2",
+    "@ckeditor/ckeditor5-react": "^11.0.0",
     "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.11.0",
     "css": "^3.0.0",
+    "jodit-react": "^5.2.19",
     "lucide-react": "^0.534.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

@@ -1,6 +1,5 @@
 import express from "express";
 import webpack from "webpack";
-import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { v2 as cloudinary } from 'cloudinary';
 //following imports for authentication
@@ -11,6 +10,10 @@ import process from 'process';
 import User from "./models/User.js";
 import authRoutes from "./routes/authRoutes.js"; // import the router
 import { signup, login, logout } from "./Controller/SignUpController.js";
+import dotenv from "dotenv";
+import addnewblog from "./routes/addnewblog.js";
+import multer from "multer";
+import path from "path";
 // Define port from .env 
 const port = process.env.PORT ;
 dotenv.config();
@@ -27,10 +30,62 @@ app.post("/api/auth/logout", logout);*/
 app.use(express.json());
 app.use("/api/auth", authRoutes); // all /signup, /login, /logout routes go here
 
-//connection with frontend 
+//connection with frontend ======CORS======
+app.use(cookieParser());
+app.use(cors({
+  origin: "http://localhost:5173",   // frontend (Vite)
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 
-app.use(cors());
 app.use(express.json());
+
+//app.use("/uploads", express.static("uploads")); // To serve uploaded images
+// Routes
+// Configure storage
+/*const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); // folder where files will be saved
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + file.originalname;
+    cb(null, uniqueSuffix);
+  },
+});*/
+
+// Multer middleware
+// Multer config (store files in memory for Cloudinary upload)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+app.use("/api/blogs", addnewblog);
+// route
+/*app.post("/api/blogs", upload.fields([
+  { name: "coverImage", maxCount: 1 },
+  { name: "sliderImage", maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const blog = new Blog({
+      title: req.body.title,
+      status: req.body.status,
+      shortDescription: req.body.shortDescription,
+      longDescription: req.body.longDescription,
+      coverImage: req.files.coverImage[0].path, // Cloudinary URL
+      sliderImage: req.files.sliderImage[0].path // Cloudinary URL
+    });
+
+    await blog.save();
+    res.json({ message: "Blog created successfully", blog });
+  } catch (error) {
+    res.status(500).json({ error: "Error creating blog" });
+  }
+});*/
+
+// Example test route
+app.post("/api/auth/login", (req, res) => {
+  res.json({ message: "Login route works!" });
+});
  
 
 // Test Route
@@ -52,9 +107,9 @@ try{
 
   //Cloudinary connection
   cloudinary.config({ 
-   Cloud_NAME: 'process.env.CLOUD_NAME', 
-    cloud_api_key: 'process.env.CLOUD_API_KEY', 
-  CLOUD_SECRET_KEY: 'process.env.CLOUD_SECRET_KEY' 
+   CLOUD_NAME: process.env.CLOUD_NAME, 
+    CLOUD_API_KEY: process.env.CLOUD_API_KEY, 
+  CLOUD_SECRET_KEY: process.env.CLOUD_SECRET_KEY 
 });
 
 console.log("Connected to cloudinary");
@@ -66,7 +121,7 @@ console.log("Connected to cloudinary");
 
 
 
-app.listen(port, () => {
+app.listen(4001, () => {
   console.log(`Server is running on port ${port}`);
 });
 

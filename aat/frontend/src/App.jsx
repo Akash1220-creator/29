@@ -12,7 +12,9 @@ import ApplyNow from './components/Pages/ApplyNow'
 import AdminPanel from './components/Panel/AdminPanel'
 import Layout from './components/Layout'
 import SignUpandLogin from './components/Pages/SignUpandLogin'
-
+import AddNewBlog from './components/Pages/AddNewBlog'
+import BlogEntries from './components/Pages/BlogEntries'
+import Addnewblogwithckeditor from './components/Pages/addnewblogwithckeditor'
 const App = () => {
   return (
     <div>
@@ -33,11 +35,20 @@ const App = () => {
           </Route>
         </Route>
 
-        <Route path='panel' element={<SignUpandLogin />} />
+
+       {/*  <Route path='panel' element={<BlogEntries/>} /> */}
+       <Route path='panel' element={<AdminPanel />} />
+      <Route path="test" element={<Addnewblogwithckeditor/>} />
         
-        {/* <Route path='panel' element={<AdminPanel />} /> */}
-
-
+        {/* <Route path='panel' element={<SignUpandLogin />} /> */}
+         
+          <Route path="/add-blog" element={<AddNewBlog />} />
+          
+         {/* CONDITIONAL RENDERING after login by admin*/}
+        {/* 
+        <Route path="panel"
+        element={isLoggedIn ? <AdminPanel /> : <SignUpandLogin onLoginSuccess={handleLoginSuccess} />} />
+      */}
 
       </Routes>
 

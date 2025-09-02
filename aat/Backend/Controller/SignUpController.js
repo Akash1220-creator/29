@@ -50,6 +50,8 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+     console.log("Received login:", req.body);
+  res.json({ message: "Login received", data: req.body });
     if (!email || !password) {
       return res.status(400).json({ message: "Please fill required fields" });
     }

@@ -31,10 +31,10 @@ const handleSubmit = async (event) => {
   }
 
   try {
-    const API_URL = import.meta.env.VITE_API_URL;
+    //const API_URL = import.meta.env.VITE_API_URL;
     const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/signup';
     
-    const url = `${API_URL}${endpoint}`;
+    const url = `${endpoint}`;//const url = `${API_URL}${endpoint}`;
     console.log('API URL:', url);
     const response = await axios.post(url, { email, password }, {
     headers: {
@@ -42,13 +42,15 @@ const handleSubmit = async (event) => {
     },
   });
     
-    const data = await response.json();
+    const data =  response.data;
+    console.log('API Response:', data);
 
-    if (!response.ok) { // Check if response status is not 2xx
-      throw new Error(data.message || 'An error occurred');
-    }
 
-    setMessage(data.message);
+  if (response.status < 200 || response.status >= 300) {
+  throw new Error(data.message || 'An error occurred');
+}
+
+    
     console.log('API Response:', data);
 
     if (isLoginMode) {

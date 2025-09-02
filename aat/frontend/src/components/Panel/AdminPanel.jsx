@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Settings, Users, BookOpen, Building2, Phone, Calendar, Trophy, Save, Plus, Trash2, FileText, Clock, FolderOpen, Folder, GripVertical, GraduationCap } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
 
 
 const AdminPanel = () => {
     const [activeTab, setActiveTab] = useState('institute');
-
+  
     // Institute Information
     const [instituteName, setInstituteName] = useState('Excellence Coaching Institute');
     const [aboutInstitute, setAboutInstitute] = useState('Leading coaching institute providing quality education and professional training for over 22 years.');
@@ -466,6 +466,140 @@ const AdminPanel = () => {
         { id: 'corporate', label: 'Corporate Training', icon: Users },
         { id: 'courses', label: 'Courses', icon: BookOpen }
     ];
+  const [entriesToShow, setEntriesToShow] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const blogEntries = [
+    {
+      id: 1,
+      title: 'First Blog Post',
+      coverPage: 'cover1.jpg',
+      sliderImage: 'slider1.jpg',
+      status: 'Published',
+      createdAt: '2025-08-01',
+    },
+    {
+      id: 2,
+      title: 'Second Blog Post',
+      coverPage: 'cover2.jpg',
+      sliderImage: 'slider2.jpg',
+      status: 'Draft',
+      createdAt: '2025-08-05',
+    },
+    {
+      id: 3,
+      title: 'Third Blog Post',
+      coverPage: 'cover3.jpg',
+      sliderImage: 'slider3.jpg',
+      status: 'Published',
+      createdAt: '2025-08-10',
+    },
+    {
+      id: 4,
+      title: 'Fourth Blog Post',
+      coverPage: 'cover4.jpg',
+      sliderImage: 'slider4.jpg',
+      status: 'Published',
+      createdAt: '2025-08-15',
+    },
+    {
+      id: 5,
+      title: 'Fifth Blog Post',
+      coverPage: 'cover5.jpg',
+      sliderImage: 'slider5.jpg',
+      status: 'Draft',
+      createdAt: '2025-08-20',
+    },
+    {
+      id: 6,
+      title: 'Sixth Blog Post',
+      coverPage: 'cover6.jpg',
+      sliderImage: 'slider6.jpg',
+      status: 'Published',
+      createdAt: '2025-08-25',
+    },
+    {
+      id: 7,
+      title: 'Seventh Blog Post',
+      coverPage: 'cover7.jpg',
+      sliderImage: 'slider7.jpg',
+      status: 'Published',
+      createdAt: '2025-08-28',
+    },
+    {
+      id: 8,
+      title: 'Eighth Blog Post',
+      coverPage: 'cover8.jpg',
+      sliderImage: 'slider8.jpg',
+      status: 'Draft',
+      createdAt: '2025-08-30',
+    },
+    {
+      id: 9,
+      title: 'Ninth Blog Post',
+      coverPage: 'cover9.jpg',
+      sliderImage: 'slider9.jpg',
+      status: 'Published',
+      createdAt: '2025-09-01',
+    },
+    {
+      id: 10,
+      title: 'Tenth Blog Post',
+      coverPage: 'cover10.jpg',
+      sliderImage: 'slider10.jpg',
+      status: 'Published',
+      createdAt: '2025-09-02',
+    },
+    {
+      id: 11,
+      title: 'Eleventh Blog Post',
+      coverPage: 'cover11.jpg',
+      sliderImage: 'slider11.jpg',
+      status: 'Draft',
+      createdAt: '2025-09-05',
+    },
+    {
+      id: 12,
+      title: 'Twelfth Blog Post',
+      coverPage: 'cover12.jpg',
+      sliderImage: 'slider12.jpg',
+      status: 'Published',
+      createdAt: '2025-09-08',
+    },
+  ];
+
+  // fallback image
+  const fallbackImage =
+    'https://media.istockphoto.com/id/1453843862/photo/business-meeting.jpg?s=612x612&w=0&k=20&c=4k9H7agmpn92B7bkUywvkK5Ckwm9Y8f8QrGs4DRDWpE=';
+
+  // Pagination values
+  const totalPages = Math.ceil(blogEntries.length / entriesToShow);
+  const indexOfLastEntry = currentPage * entriesToShow;
+  const indexOfFirstEntry = indexOfLastEntry - entriesToShow;
+  const currentEntries = blogEntries.slice(indexOfFirstEntry, indexOfLastEntry);
+  const totalEntries = blogEntries.length;
+
+  const handleDropdownChange = (e) => {
+    setEntriesToShow(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleEdit = (id) => {
+    console.log(`Editing blog entry with ID: ${id}`);
+  };
+
+  const handleDelete = (id) => {
+    console.log(`Deleting blog entry with ID: ${id}`);
+  };
+
+  const handleAddBlog = () => {
+    console.log('Adding new blog entry...');
+  };
+   const navigate = useNavigate();
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -592,86 +726,195 @@ const AdminPanel = () => {
 
                                 {/* News & Events Tab */}
                                 {activeTab === 'news' && (
-                                    <div className="space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <h2 className="text-2xl font-bold text-gray-900">News & Events</h2>
-                                            <button
-                                                onClick={addNews}
-                                                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 space-x-2"
-                                            >
-                                                <Plus className="h-4 w-4" />
-                                                <span>Add News</span>
-                                            </button>
-                                        </div>
+                                     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-6 text-left">
+        Blog Entries
+      </h1>
 
-                                        <div className="space-y-6">
-                                            {news.map((item) => (
-                                                <div key={item.id} className="p-6 border border-gray-200 rounded-lg">
-                                                    <div className="flex items-center justify-between mb-4">
-                                                        <h3 className="text-lg font-semibold text-gray-900">News Item #{item.id}</h3>
-                                                        <button
-                                                            onClick={() => removeNews(item.id)}
-                                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </button>
-                                                    </div>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-2">
+          <label htmlFor="entries-dropdown" className="text-gray-700 font-medium">
+            Show entries:
+          </label>
+          <select
+            id="entries-dropdown"
+            className="border border-gray-300 rounded-md p-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={entriesToShow}
+            onChange={handleDropdownChange}
+          >
+            {[5, 10].map((num) => (
+              <option key={num} value={num}>
+                {num}
+              </option>
+            ))}
+          </select>
+        </div>
 
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        <div className="space-y-4">
-                                                            <div>
-                                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                                    Title
-                                                                </label>
-                                                                <input
-                                                                    type="text"
-                                                                    value={item.title}
-                                                                    onChange={(e) => updateNews(item.id, 'title', e.target.value)}
-                                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                                />
-                                                            </div>
+        <button
+           onClick={() => navigate("/add-blog")}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          + Add New Blog
+        </button>
+      </div>
 
-                                                            <div>
-                                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                                    Date
-                                                                </label>
-                                                                <input
-                                                                    type="date"
-                                                                    value={item.date}
-                                                                    onChange={(e) => updateNews(item.id, 'date', e.target.value)}
-                                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                                />
-                                                            </div>
+      <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Serial Number
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Title
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Cover Page
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Slider Image
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Created At
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Manage
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {currentEntries.map((entry, index) => (
+              <tr key={entry.id}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {indexOfFirstEntry + index + 1}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {entry.title}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <img
+                    src={entry.coverPage.startsWith('http') ? entry.coverPage : fallbackImage}
+                    alt={entry.title + ' Cover'}
+                    className="h-16 w-24 object-cover rounded-md border"
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <img
+                    src={entry.sliderImage.startsWith('http') ? entry.sliderImage : fallbackImage}
+                    alt={entry.title + ' Slider'}
+                    className="h-16 w-24 object-cover rounded-md border"
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      entry.status === 'Published'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {entry.status}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {entry.createdAt}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
+                  <div className="flex items-center space-x-3">
+                    {/* Edit button */}
+                    <button
+                      onClick={() => handleEdit(entry.id)}
+                      className="text-green-600 hover:text-green-800 focus:outline-none"
+                      aria-label="Edit"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </button>
 
-                                                            <div>
-                                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                                    Image URL
-                                                                </label>
-                                                                <input
-                                                                    type="url"
-                                                                    value={item.image}
-                                                                    onChange={(e) => updateNews(item.id, 'image', e.target.value)}
-                                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                                />
-                                                            </div>
-                                                        </div>
+                    {/* Delete button */}
+                    <button
+                      onClick={() => handleDelete(entry.id)}
+                      className="text-red-600 hover:text-red-800 focus:outline-none"
+                      aria-label="Delete"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-                                                        <div>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                                Summary
-                                                            </label>
-                                                            <textarea
-                                                                value={item.summary}
-                                                                onChange={(e) => updateNews(item.id, 'summary', e.target.value)}
-                                                                rows={6}
-                                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
+      {/* Pagination Controls */}
+      <div className="mt-6 flex justify-between items-center">
+        <div className="text-sm text-gray-700 font-medium">
+          Showing <span className="font-semibold">{indexOfFirstEntry + 1}</span> to{' '}
+          <span className="font-semibold">{indexOfFirstEntry + currentEntries.length}</span> of{' '}
+          <span className="font-semibold">{totalEntries}</span> entries
+        </div>
+        <nav
+          className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+          aria-label="Pagination"
+        >
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 border border-gray-300 bg-white text-sm ${
+              currentPage === 1 ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-50'
+            }`}
+          >
+            Previous
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => handlePageChange(i + 1)}
+              className={`px-3 py-1 border text-sm ${
+                i + 1 === currentPage
+                  ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 border border-gray-300 bg-white text-sm ${
+              currentPage === totalPages ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-50'
+            }`}
+          >
+            Next
+          </button>
+        </nav>
+      </div>
+    </div>
+
                                 )}
 
                                 {/* Contact Info Tab */}
