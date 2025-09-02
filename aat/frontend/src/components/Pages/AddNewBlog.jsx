@@ -30,7 +30,7 @@ const AddNewBlog = () => {
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
-
+    
       alert('✅ Blog submitted successfully!');
       console.log('Server response:', response.data);
 

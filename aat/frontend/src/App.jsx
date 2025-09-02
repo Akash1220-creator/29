@@ -36,8 +36,8 @@ const App = () => {
         </Route>
 
 
-       {/*  <Route path='panel' element={<BlogEntries/>} /> */}
-       <Route path='panel' element={<AdminPanel />} />
+       {/*    <Route path='panel' element={<BlogEntries/>} /> */}
+     <Route path='panel' element={<AdminPanel />} />
       <Route path="test" element={<Addnewblogwithckeditor/>} />
         
         {/* <Route path='panel' element={<SignUpandLogin />} /> */}

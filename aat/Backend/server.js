@@ -5,7 +5,6 @@ import { v2 as cloudinary } from 'cloudinary';
 //following imports for authentication
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import institute from "./routes/institute.js"
 import process from 'process';
 import User from "./models/User.js";
 import authRoutes from "./routes/authRoutes.js"; // import the router
@@ -14,6 +13,8 @@ import dotenv from "dotenv";
 import addnewblog from "./routes/addnewblog.js";
 import multer from "multer";
 import path from "path";
+import institute from "./routes/institute.js";
+import instituteRoutes  from "./routes/institute.js";
 // Define port from .env 
 const port = process.env.PORT ;
 dotenv.config();
@@ -118,6 +119,8 @@ console.log("Connected to cloudinary");
 
 
 
+app.use("/", instituteRoutes);
+// institute routes
 
 
 

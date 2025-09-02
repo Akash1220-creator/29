@@ -1,33 +1,33 @@
-import React, { useState } from 'react';
-import AddNewBlog from './AddNewBlog';
+import React, { useState, useEffect } from "react";
+import AddNewBlog from "./AddNewBlog";
+import axios from "axios";
 
 const BlogEntriesPage = () => {
   const [entriesToShow, setEntriesToShow] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
-  const [blogEntries, setBlogEntries] = useState([
-    {
-      id: 1,
-      title: 'First Blog Post',
-      coverPage: 'cover1.jpg',
-      sliderImage: 'slider1.jpg',
-      status: 'Published',
-      createdAt: '2025-08-01',
-    },
-    {
-      id: 2,
-      title: 'Second Blog Post',
-      coverPage: 'cover2.jpg',
-      sliderImage: 'slider2.jpg',
-      status: 'Draft',
-      createdAt: '2025-08-05',
-    },
-    // ... rest of your initial blogs
-  ]);
-
+  const [blogEntries, setBlogEntries] = useState([]); // initially empty
+  const [loading, setLoading] = useState(true);
   const [showAddBlog, setShowAddBlog] = useState(false);
 
   const fallbackImage =
-    'https://media.istockphoto.com/id/1453843862/photo/business-meeting.jpg?s=612x612&w=0&k=20&c=4k9H7agmpn92B7bkUywvkK5Ckwm9Y8f8QrGs4DRDWpE=';
+    "https://media.istockphoto.com/id/1453843862/photo/business-meeting.jpg?s=612x612&w=0&k=20&c=4k9H7agmpn92B7bkUywvkK5Ckwm9Y8f8QrGs4DRDWpE=";
+
+  // ✅ Fetch blogs from backend
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await axios.get("http://localhost:4001/api/blogs");
+        setBlogEntries(response.data); // backend should return array of blogs
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+        alert("Failed to fetch blogs.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
 
   // Pagination
   const totalPages = Math.ceil(blogEntries.length / entriesToShow);
@@ -50,8 +50,14 @@ const BlogEntriesPage = () => {
     console.log(`Editing blog entry with ID: ${id}`);
   };
 
-  const handleDelete = (id) => {
-    setBlogEntries((prev) => prev.filter((entry) => entry.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:4001/api/blogs/${id}`);
+      setBlogEntries((prev) => prev.filter((entry) => entry._id !== id)); // backend uses _id
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+      alert("Failed to delete blog. Please try again.");
+    }
   };
 
   const handleAddBlog = () => {
@@ -61,6 +67,10 @@ const BlogEntriesPage = () => {
   const handleNewBlogSubmit = (newBlog) => {
     setBlogEntries((prev) => [newBlog, ...prev]); // add on top
   };
+
+  if (loading) {
+    return <p className="text-center text-gray-600">Loading blogs...</p>;
+  }
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -75,9 +85,13 @@ const BlogEntriesPage = () => {
             Blog Entries
           </h1>
 
+          {/* Entries per page + Add new blog */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
-              <label htmlFor="entries-dropdown" className="text-gray-700 font-medium">
+              <label
+                htmlFor="entries-dropdown"
+                className="text-gray-700 font-medium"
+              >
                 Show entries:
               </label>
               <select
@@ -107,56 +121,58 @@ const BlogEntriesPage = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cover Page</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Slider Image</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created At</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Manage</th>
+                  <th className="px-6 py-3">#</th>
+                  <th className="px-6 py-3">Title</th>
+                  <th className="px-6 py-3">Cover Page</th>
+                  <th className="px-6 py-3">Slider Image</th>
+                  <th className="px-6 py-3">Status</th>
+                  <th className="px-6 py-3">Created At</th>
+                  <th className="px-6 py-3">Manage</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody>
                 {currentEntries.map((entry, index) => (
-                  <tr key={entry.id}>
+                  <tr key={entry._id}>
                     <td className="px-6 py-4">{indexOfFirstEntry + index + 1}</td>
                     <td className="px-6 py-4">{entry.title}</td>
                     <td className="px-6 py-4">
                       <img
-                        src={entry.coverPage ? fallbackImage : fallbackImage}
-                        alt={entry.title + ' Cover'}
+                        src={entry.coverPage || fallbackImage}
+                        alt={entry.title + " Cover"}
                         className="h-16 w-24 object-cover rounded-md border"
                       />
                     </td>
                     <td className="px-6 py-4">
-                      <img
-                        src={entry.sliderImage ? fallbackImage : fallbackImage}
-                        alt={entry.title + ' Slider'}
-                        className="h-16 w-24 object-cover rounded-md border"
-                      />
+                     <img
+  src={`http://localhost:4001/uploads/${entry.sliderImage}` || fallbackImage}
+  alt={entry.title + " Slider"}
+  className="h-16 w-24 object-cover rounded-md border"
+/>
                     </td>
                     <td className="px-6 py-4">
                       <span
                         className={`px-2 inline-flex text-xs font-semibold rounded-full ${
-                          entry.status === 'Published'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                          entry.status === "Published"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
                         }`}
                       >
                         {entry.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">{entry.createdAt}</td>
+                    <td className="px-6 py-4">
+                      {new Date(entry.createdAt).toLocaleDateString()}
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
                         <button
-                          onClick={() => handleEdit(entry.id)}
+                          onClick={() => handleEdit(entry._id)}
                           className="text-green-600 hover:text-green-800"
                         >
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(entry.id)}
+                          onClick={() => handleDelete(entry._id)}
                           className="text-red-600 hover:text-red-800"
                         >
                           Delete
@@ -172,8 +188,8 @@ const BlogEntriesPage = () => {
           {/* Pagination */}
           <div className="mt-6 flex justify-between items-center">
             <div className="text-sm text-gray-700 font-medium">
-              Showing <b>{indexOfFirstEntry + 1}</b> to{' '}
-              <b>{indexOfFirstEntry + currentEntries.length}</b> of{' '}
+              Showing <b>{indexOfFirstEntry + 1}</b> to{" "}
+              <b>{indexOfFirstEntry + currentEntries.length}</b> of{" "}
               <b>{totalEntries}</b> entries
             </div>
             <div>
@@ -189,7 +205,7 @@ const BlogEntriesPage = () => {
                   key={i + 1}
                   onClick={() => handlePageChange(i + 1)}
                   className={`px-3 py-1 border ${
-                    currentPage === i + 1 ? 'bg-blue-100' : 'bg-white'
+                    currentPage === i + 1 ? "bg-blue-100" : "bg-white"
                   }`}
                 >
                   {i + 1}

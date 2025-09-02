@@ -39,6 +39,19 @@ router.post(
   }
 );
 
+//@DELETE Delete Blog BY Dynamic Id /api/blogs/:id
+router.delete("/:id", async (req, res) => {
+  try {
+    console.log("Trying to delete:", req.params.id); // 👈 debug
+    const blog = await Blog.findByIdAndDelete(req.params.id);
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
+    res.json({ message: "Blog deleted successfully" });
+  } catch (error) {
+    console.error("Delete error:", error.message); // 👈 log the actual cause
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 
 
 // @GET Get All Blogs
