@@ -18,7 +18,7 @@ const Header = () => {
                             <div className=" h-12 m-4 bg-blue-600 rounded-full flex items-center justify-center">
 
 
-                                <img className='h-20' src={logo_image} alt="" srcset="" />
+                                <img className='h-20' src={logo_image} alt="" srcSet="" />
 
                                 {/* <Building className="w-7 h-7 text-white" /> */}
                             </div>

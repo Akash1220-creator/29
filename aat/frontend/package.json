@@ -12,6 +12,7 @@
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^39.0.2",
     "@ckeditor/ckeditor5-react": "^11.0.0",
+    "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.11.0",
     "css": "^3.0.0",

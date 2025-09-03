@@ -26,21 +26,25 @@ const AddNewBlog = () => {
       if (sliderImage) formData.append('sliderImage', sliderImage);
 
       const response = await axios.post(
-        'http://localhost:4001/api/blogs',
+        'api/blogs',
         formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+        {
+          headers: {
+            "Accept": "application/json", // Optional
+          },
+        }
       );
     
       alert('✅ Blog submitted successfully!');
       console.log('Server response:', response.data);
 
-      // Reset form
+      /*Reset form
       setTitle('');
       setStatus('Draft');
       setShortDescription('');
       setLongDescription('');
       setCoverImage(null);
-      setSliderImage(null);
+      setSliderImage(null);*/
     } catch (error) {
       console.error('Error submitting blog:', error);
       alert('❌ Failed to submit blog. Check console for details.');

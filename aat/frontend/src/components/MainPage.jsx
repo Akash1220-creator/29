@@ -21,10 +21,46 @@ import {
     Microscope
 } from 'lucide-react'
 
+import axios from "axios";
+ 
+export default function MainPage() {
+  const [carouselData, setCarouselData] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:4001/api/carousel")
+      .then((res) => setCarouselData(res.data))
+      .catch((err) => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    if (carouselData.length > 0) {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % carouselData.length);
+      }, 4000);
+      return () => clearInterval(timer);
+    }
+  }, [carouselData]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % carouselData.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide(
+      (prev) => (prev - 1 + carouselData.length) % carouselData.length
+    );
+  };
+
+
+    
+  const newsItems = [ { id: 1, title: "Annual Science Fair 2025", date: "March 15, 2025", summary: "Students showcase innovative projects in our biggest science fair yet.", image: "https://images.pexels.com/photos/2280549/pexels-photo-2280549.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&dpr=1" }, { id: 2, title: "New Computer Lab Opening", date: "February 28, 2025", summary: "State-of-the-art computer lab with latest technology now available.", image: "https://images.pexels.com/photos/3401403/pexels-photo-3401403.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&dpr=1" }, { id: 3, title: "Sports Day Championship", date: "April 10, 2025", summary: "Inter-house sports competition featuring various athletic events.", image: "https://images.pexels.com/photos/1263349/pexels-photo-1263349.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&dpr=1" } ] 
+  const programs = [ { icon: <BookOpen className="w-8 h-8" />, title: "Primary Education", description: "Grades 1-5 with focus on foundational learning and creativity", features: ["Interactive Learning", "Creative Arts", "Basic Sciences"] }, { icon: <Microscope className="w-8 h-8" />, title: "Secondary Education", description: "Grades 6-10 with comprehensive curriculum and skill development", features: ["Advanced Sciences", "Mathematics", "Language Arts"] }, { icon: <GraduationCap className="w-8 h-8" />, title: "Senior Secondary", description: "Grades 11-12 with specialized streams and career preparation", features: ["Science Stream", "Commerce Stream", "Arts Stream"] } ]
 
 
 
-const heroImages = [
+/*const heroImages = [
     'https://images.pexels.com/photos/207692/pexels-photo-207692.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
     'https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
     'https://images.pexels.com/photos/5427674/pexels-photo-5427674.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
@@ -112,13 +148,14 @@ export default function MainPage() {
     const prevSlide = () => {
         setCurrentSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
     }
-
+*/
     return (
         <div className="min-h-screen bg-white font-sans">
 
 
 
-            {/* Hero Section with Image Slider */}
+            {/* 
+               Hero Section with Image Slider 
             <section id="home" className="relative">
                 <div className="relative h-[500px] md:h-[600px] overflow-hidden">
                     {heroImages.map((image, index) => (
@@ -136,7 +173,7 @@ export default function MainPage() {
                         </div>
                     ))}
 
-                    {/* Hero Content */}
+                    {/* Hero Content 
                     <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
                         <div className="max-w-4xl">
                             <h2 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
@@ -156,7 +193,7 @@ export default function MainPage() {
                         </div>
                     </div>
 
-                    {/* Navigation Buttons */}
+                    {/* Navigation Buttons 
                     <button
                         onClick={prevSlide}
                         className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors"
@@ -170,7 +207,7 @@ export default function MainPage() {
                         <ChevronRight className="w-6 h-6" />
                     </button>
 
-                    {/* Slide Indicators */}
+                    {/* Slide Indicators 
                     <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
                         {heroImages.map((_, index) => (
                             <button
@@ -182,7 +219,67 @@ export default function MainPage() {
                         ))}
                     </div>
                 </div>
-            </section>
+            </section> 
+            */}
+
+            <section id="home" className="relative">
+      <div className="relative h-[500px] md:h-[600px] overflow-hidden">
+        {carouselData.map((item, index) => (
+          <div
+            key={item._id}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentSlide ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <img
+              src={item.imageUrl}
+              alt={item.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/40"></div>
+
+            {/* Text Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
+              <div className="max-w-4xl">
+                <h2 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                  {item.title}
+                </h2>
+                <p className="text-xl md:text-2xl mb-8 opacity-90">
+                  {item.description}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Navigation Buttons */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+
+        {/* Indicators */}
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          {carouselData.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-3 h-3 rounded-full transition-colors ${
+                index === currentSlide ? "bg-white" : "bg-white/50"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
 
             {/* About Section */}
             <section id="about" className="py-20 bg-gray-50">

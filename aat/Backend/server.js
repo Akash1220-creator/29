@@ -15,6 +15,8 @@ import multer from "multer";
 import path from "path";
 import institute from "./routes/institute.js";
 import instituteRoutes  from "./routes/institute.js";
+import carouselRoutes from "./routes/carouselRoutes.js";
+
 // Define port from .env 
 const port = process.env.PORT ;
 dotenv.config();
@@ -62,6 +64,11 @@ const upload = multer({ storage });
 
 app.use("/api/blogs", addnewblog);
 // route
+
+// ✅ Use routes
+app.use("/api/carousel", carouselRoutes);
+
+
 /*app.post("/api/blogs", upload.fields([
   { name: "coverImage", maxCount: 1 },
   { name: "sliderImage", maxCount: 1 }

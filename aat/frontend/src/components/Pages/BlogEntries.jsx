@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AddNewBlog from "./AddNewBlog";
 import axios from "axios";
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 const BlogEntriesPage = () => {
   const [entriesToShow, setEntriesToShow] = useState(5);
@@ -143,11 +144,11 @@ const BlogEntriesPage = () => {
                       />
                     </td>
                     <td className="px-6 py-4">
-                     <img
-  src={`http://localhost:4001/uploads/${entry.sliderImage}` || fallbackImage}
-  alt={entry.title + " Slider"}
-  className="h-16 w-24 object-cover rounded-md border"
-/>
+                      <img
+                        src={`http://localhost:4001/uploads/${entry.sliderImage}` || fallbackImage}
+                        alt={entry.title + " Slider"}
+                        className="h-16 w-24 object-cover rounded-md border"
+                      />
                     </td>
                     <td className="px-6 py-4">
                       <span
@@ -165,17 +166,20 @@ const BlogEntriesPage = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
+                        {/* ✅ Edit Button with Green Pen */}
                         <button
                           onClick={() => handleEdit(entry._id)}
-                          className="text-green-600 hover:text-green-800"
+                          className="p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-600 hover:text-green-800 transition transform hover:scale-110"
                         >
-                          Edit
+                          <PencilSquareIcon className="h-5 w-5" />
                         </button>
+
+                        {/* ✅ Delete Button with Red Dustbin */}
                         <button
                           onClick={() => handleDelete(entry._id)}
-                          className="text-red-600 hover:text-red-800"
+                          className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-800 transition transform hover:scale-110"
                         >
-                          Delete
+                          <TrashIcon className="h-5 w-5" />
                         </button>
                       </div>
                     </td>

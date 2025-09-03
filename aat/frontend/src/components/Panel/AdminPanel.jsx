@@ -1,13 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Users, BookOpen, Building2, Phone, Calendar, Trophy, Save, Plus, Trash2, FileText, Clock, FolderOpen, Folder, GripVertical, GraduationCap } from 'lucide-react';
+import { Settings, Home, Users, BookOpen, Building2, Phone, Calendar, Trophy, Save, Plus, Trash2, FileText, Clock, FolderOpen, Folder, GripVertical, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import AddNewBlog from '../Pages/AddNewBlog';
 import Institute from '../../../../Backend/models/Institute';
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
+
 const AdminPanel = () => {
-    const [activeTab, setActiveTab] = useState('institute');
+
+
+    const [carouselData, setcarouselData] = useState({
+    imageUrl: "",
+    title: "",
+    description: "",
+  });
+  const [message, setMessage] = useState("");
+  const handleChange = (e) => {
+    setcarouselData({ ...carouselData, [e.target.name]: e.target.value });
+  };
+
+const handleSubmit = async ()=>{
+    try {
+          try {
+      const res = await axios.post("http://localhost:4001/api/carousel", carouselData);
+      setMessage("✅ Carousel data added successfully!");
+      setcarouselData({ imageUrl: "", title: "", description: "" });
+    } catch (err) {
+      setMessage("❌ Error: " + err.response?.data?.error || err.message);
+    }
+    } catch (error) {
+        
+    }{
+
+    }
+};
+
+
+  
   
     // Institute Information
+    const [activeTab, setActiveTab] = useState('home');
     const [instituteName, setInstituteName] = useState('Give Institute Name Here');
     const [aboutInstitute, setAboutInstitute] = useState('Explain about institute here...');
 
@@ -474,21 +506,23 @@ const AdminPanel = () => {
         setStats(newStats);
     };
 
-    const tabs = [
-        { id: 'institute', label: 'Institute Info', icon: Building2 },
-        { id: 'stats', label: 'Statistics', icon: Trophy },
-        { id: 'news', label: 'News & Events', icon: Calendar },
-        { id: 'contact', label: 'Contact Info', icon: Phone },
-        { id: 'corporate', label: 'Corporate Training', icon: Users },
-        { id: 'courses', label: 'Courses', icon: BookOpen }
-    ];
+   const tabs = [
+  { id: 'home', label: 'Home', icon: Home },
+  { id: 'institute', label: 'Institute Info', icon: Building2 },
+  { id: 'stats', label: 'Statistics', icon: Trophy },
+  { id: 'courses', label: 'Courses', icon: GraduationCap },
+  { id: 'news', label: 'News & Events', icon: Calendar },
+  { id: 'corporate', label: 'Corporate Training', icon: Users },  
+  { id: 'contact', label: 'Contact Info', icon: Phone },
+];
+
   
 
   const [entriesToShow, setEntriesToShow] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [blogEntries, setBlogEntries] = useState([]); // initially empty
   const [loading, setLoading] = useState(true);
-  const [showAddBlog, setShowAddBlog] = useState(false);
+  const [showAddBlog, setShowAddBlog] = useState(false); 
 
   const fallbackImage =
     "https://media.istockphoto.com/id/1453843862/photo/business-meeting.jpg?s=612x612&w=0&k=20&c=4k9H7agmpn92B7bkUywvkK5Ckwm9Y8f8QrGs4DRDWpE=";
@@ -560,7 +594,7 @@ const AdminPanel = () => {
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center space-x-3">
                             <Settings className="h-8 w-8 text-blue-600" />
-                            <h1 className="text-2xl font-bold text-gray-900">Website Panel</h1>
+                            <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
                         </div>
                         <button
                             onClick={handleSave}
@@ -601,7 +635,61 @@ const AdminPanel = () => {
                     <div className="flex-1">
                         <div className="bg-white rounded-xl shadow-sm border-gray-200 border">
                             <div className="p-8">
+                                {/* HOME TAB*/}
+                                {activeTab === 'home' && (  
+         <div className="space-y-6">
+         <div>  
+            <h2 className="text-2xl font-bold mb-6 text-gray-800">
+             Add Carousel Data
+            </h2>
 
+       {/* <form onSubmit={handleSubmit} className="space-y-4">*/}
+          <div>
+            <label className="block text-gray-600 mb-1">Image URL</label>
+            <input
+              type="text"
+              name="imageUrl"
+              value={carouselData.imageUrl}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-3 py-2"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-600 mb-1">Title</label>
+            <input
+              type="text"
+              name="title"
+              value={carouselData.title}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-3 py-2"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-600 mb-1">Description</label>
+            <textarea
+              name="description"
+              value={carouselData.description}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-3 py-2"
+              rows="3"
+            />
+          </div>
+
+          <button
+          onClick={handleSubmit} 
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" >
+                    Send Carousel Data
+         </button>
+      
+
+         {message && <p className="mt-4 text-center text-sm">{message}</p>}
+      </div>
+    </div>
+   )}
                                 {/* Institute Info Tab */}
                                 {activeTab === 'institute' && (
                                     
@@ -693,9 +781,10 @@ const AdminPanel = () => {
         />
       ) : (
         <>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-6 text-left">
+        
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Blog Entries
-          </h1>
+        </h2>
 
           {/* Entries per page + Add new blog */}
           <div className="flex items-center justify-between mb-4">
@@ -777,17 +866,20 @@ const AdminPanel = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
+                        {/* ✅ Edit Button with Green Pen */}
                         <button
                           onClick={() => handleEdit(entry._id)}
-                          className="text-green-600 hover:text-green-800"
+                          className="p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-600 hover:text-green-800 transition transform hover:scale-110"
                         >
-                          Edit
+                          <PencilSquareIcon className="h-5 w-5" />
                         </button>
+
+                        {/* ✅ Delete Button with Red Dustbin */}
                         <button
                           onClick={() => handleDelete(entry._id)}
-                          className="text-red-600 hover:text-red-800"
+                          className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-800 transition transform hover:scale-110"
                         >
-                          Delete
+                          <TrashIcon className="h-5 w-5" />
                         </button>
                       </div>
                     </td>
