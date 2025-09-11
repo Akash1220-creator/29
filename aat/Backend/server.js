@@ -12,10 +12,15 @@ import { signup, login, logout } from "./Controller/SignUpController.js";
 import dotenv from "dotenv";
 import addnewblog from "./routes/addnewblog.js";
 import multer from "multer";
+ import carouselRoutes from "./routes/carouselRoutes.js";
+import aboutsectionRoutes from "./routes/aboutsectionRoutes.js";
 import path from "path";
-import institute from "./routes/institute.js";
-import instituteRoutes  from "./routes/institute.js";
-import carouselRoutes from "./routes/carouselRoutes.js";
+import { fileURLToPath } from "url";
+import instituteRoutes from "./routes/instituteRoutes.js";
+
+// Define __filename and __dirname in ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Define port from .env 
 const port = process.env.PORT ;
@@ -37,7 +42,7 @@ app.use("/api/auth", authRoutes); // all /signup, /login, /logout routes go here
 app.use(cookieParser());
 app.use(cors({
   origin: "http://localhost:5173",   // frontend (Vite)
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
@@ -59,15 +64,23 @@ app.use(express.json());
 
 // Multer middleware
 // Multer config (store files in memory for Cloudinary upload)
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 app.use("/api/blogs", addnewblog);
 // route
 
-// ✅ Use routes
-app.use("/api/carousel", carouselRoutes);
+// ✅ news and update section Routes
+app.use("/api/news", newsRoutes);
 
+// 2. Use Routes
+app.use("/api/carousel", carouselRoutes);
+// use Routes for about section
+app.use("/api/about", aboutsectionRoutes);
+/* serve uploads folder
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);*/
+// Serve static images in Uploads folder
+app.use("/Uploads", express.static(path.join(__dirname, "Uploads")));
+//app.use("/uploads", express.static("/Uploads"));
 
 /*app.post("/api/blogs", upload.fields([
   { name: "coverImage", maxCount: 1 },
@@ -94,7 +107,8 @@ app.use("/api/carousel", carouselRoutes);
 app.post("/api/auth/login", (req, res) => {
   res.json({ message: "Login route works!" });
 });
- 
+ // Routes
+app.use("/api/institute", instituteRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
@@ -104,12 +118,12 @@ app.get("/", (req, res) => {
 app.use(cookieParser()); //extract token cereated in cookies while creaating a blog by Blog.create(blogData) 
 
 //Mongo DB Connection
-try{
-  mongoose.connect(MONGO_URL);
-  console.log("Connected to MongoDB");
-}catch (error){
-  console.log(error);
-}
+mongoose.connect(MONGO_URL)
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch(err => {
+    console.error("❌ MongoDB connection error:", err.message);
+    process.exit(1); // stop the server if MongoDB connection fails
+  });
 
 
 

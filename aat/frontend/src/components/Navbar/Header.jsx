@@ -1,31 +1,59 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import logo_image from '../../assets/img/Logo.jpg'
 import { NavLink } from 'react-router-dom';
 import { Menu } from 'lucide-react';
-
+import axios from 'axios';
 
 const Header = () => {
 
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+    //dynamic institute info fetching
+
+    const [institute, setInstitute] = useState(null);
+
+    useEffect(() => {
+        const fetchInstitute = async () => {
+            try {
+                const res = await axios.get("http://localhost:4001/api/institute");
+                //setInstitute(res.data);
+                setInstitute(Array.isArray(res.data) ? res.data[0] : res.data);
+                console.log("Fetched institute data in header.jsx:", res.data);
+                const interval = setInterval(fetchInstitute, 10000); // fetch every 2 seconds
+                return () => clearInterval(interval); // cleanup
+            } catch (err) {
+                console.error("Error fetching institute info:", err);
+            }
+        };
+
+        fetchInstitute();
+    }, []);
+
+    if (!institute) return <p>Loading...</p>;
+
     return (
         <div>
-            <header className="bg-white  shadow-lg sticky top-0 z-50">
-                <div className=" p-10   py-4">
-                    <div className="flex  items-center justify-between">
-                        <div className="flex  items-center gap-2 ">
-
-                            <div className=" h-12 m-4 bg-blue-600 rounded-full flex items-center justify-center">
-
-
-                                <img className='h-20' src={logo_image} alt="" srcSet="" />
-
-                                {/* <Building className="w-7 h-7 text-white" /> */}
+            <header className="bg-white shadow-lg sticky top-0 z-50">
+                <div className="p-10 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <div className="h-12 m-4 bg-blue-600 rounded-full flex items-center justify-center">
+                                {institute.logo && (
+                                    <img
+                                        className="h-20"
+                                        src={`http://localhost:4001/Uploads/${institute.logo}`}
+                                        alt="Institute Logo"
+                                    />
+                                )}
                             </div>
-
                             <div>
-                                <h1 className="text-xl sm:text-2xl font-bold text-blue-900">Aayush Institute of Professional Studies</h1>
-                                <p className="text-sm text-gray-600 hidden sm:block">Excellence in Education Since 2002</p>
+                                <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
+                                    {institute.name}
+                                </h1>
+                                <p className="text-sm text-gray-600 hidden sm:block">
+                                    {institute.about}
+                                </p>
+
                             </div>
                         </div>
 

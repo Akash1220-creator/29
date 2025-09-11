@@ -15,6 +15,12 @@ import SignUpandLogin from './components/Pages/SignUpandLogin'
 import AddNewBlog from './components/Pages/AddNewBlog'
 import BlogEntries from './components/Pages/BlogEntries'
 import Addnewblogwithckeditor from './components/Pages/addnewblogwithckeditor'
+//import Homepagesaboutsection from './components/Pages/Homepagesaboutsection'
+import Slidertest from './components/Pages/Slidertest'
+import Test from './components/Pages/Test'  
+//import { isLoggedIn, handleLoginSuccess } from './components/Pages/SignUpandLogin'
+import Slideradminpanel from './components/Pages/NewsAdminPage'
+import NewsAdminPage from './components/Pages/NewsAdminPage'
 const App = () => {
   return (
     <div>
@@ -31,6 +37,7 @@ const App = () => {
             <Route path='News&Updates' element={<News />} />
             <Route path='apply-now' element={<ApplyNow />}>
               <Route path='registration-form' element={<RegistrationForm />} />
+            
             </Route>
           </Route>
         </Route>
@@ -38,7 +45,11 @@ const App = () => {
 
        {/*    <Route path='panel' element={<BlogEntries/>} /> */}
      <Route path='panel' element={<AdminPanel />} />
-      <Route path="test" element={<Addnewblogwithckeditor/>} />
+      {/* <Route path="test" element={<Homepagesaboutsection/>} /> */}
+      <Route path="slideer" element={<NewsAdminPage/>} />
+        
+        <Route path="test" element={<Slidertest/>} />
+        <Route path="testing" element={<Test/>} />
         
         {/* <Route path='panel' element={<SignUpandLogin />} /> */}
          

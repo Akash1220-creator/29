@@ -12,7 +12,10 @@
     "mongoose": "^8.18.0",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
+    "override": "^0.0.1",
+    "path": "^0.12.7",
     "process": "^0.11.10",
+    "url": "^0.11.4",
     "webpack": "^5.101.3"
   },
   "name": "backend",
