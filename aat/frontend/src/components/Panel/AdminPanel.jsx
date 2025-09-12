@@ -8,6 +8,49 @@ import { PencilSquareIcon, TrashIcon, EyeIcon, EyeSlashIcon } from '@heroicons/r
 
 const AdminPanel = () => {
 
+
+  //news and upadtes info fetch
+
+  const [news, setNews] = useState([]);
+  const [showEditBlog, setShowEditBlog] = useState(false);
+const [editingEntry, setEditingEntry] = useState(null);
+const handlenewsEdit = (id) => {
+  const entryToEdit = news.find((n) => n._id === id); // find the clicked entry
+  setEditingEntry(entryToEdit); // set entry to state
+  setShowEditBlog(true);        // show the form
+};
+const handleEditBlogSubmit = async (updatedEntry) => {
+  try {
+    // 🔹 Update the entry in backend
+    await axios.put(`/api/news/${updatedEntry._id}`, updatedEntry);
+
+    // 🔹 Update the entry in state
+    setNews((prevNews) =>
+      prevNews.map((n) => (n._id === updatedEntry._id ? updatedEntry : n))
+    );
+
+    // 🔹 Close the edit form
+    setShowEditBlog(false);
+    setEditingEntry(null);
+  } catch (error) {
+    console.error("Error updating blog:", error);
+  }
+};
+
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await axios.get("/api/news"); // Backend API endpoint
+        setNews(response.data);
+      } catch (error) {
+        console.error("Error fetching news:", error);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
   //logo preview institue information 
   const [instituteName, setInstituteName] = useState("");
   const [aboutInstitute, setAboutInstitute] = useState("");
@@ -111,9 +154,9 @@ const AdminPanel = () => {
     };
 
     fetchCarousel(); // initial fetch
-    const interval = setInterval(fetchCarousel, 5000); // fetch every 2 sec see up changes  without reloading.
-
-    return () => clearInterval(interval); // cleanup
+    //polling not required
+    //const interval = setInterval(fetchCarousel, 5000); // fetch every 2 sec see up changes  without reloading.
+    //return () => clearInterval(interval); // cleanup
   }, []);
 
 
@@ -759,7 +802,7 @@ const AdminPanel = () => {
     { id: 'institute', label: 'Institute Info', icon: Building2 },
     { id: 'home', label: 'Home Page Slider', icon: Home },
     { id: 'stats', label: 'Statistics', icon: Trophy },
-    { id: 'courses', label: 'Courses', icon: GraduationCap },
+    { id: 'courses', label: 'Academic Programs', icon: GraduationCap },
     { id: 'news', label: 'News & Updates', icon: Calendar },
     { id: 'corporate', label: 'Corporate Training', icon: Users },
     { id: 'contact', label: 'Contact Info', icon: Phone },
@@ -825,6 +868,21 @@ const AdminPanel = () => {
       alert("Failed to delete blog. Please try again.");
     }
   };
+const handlenewsDelete = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this news item?")) return;
+
+  try {
+    // Call backend API to delete
+    await axios.delete(`/api/news/${id}`);
+
+    // Remove deleted item from state
+    setNews((prevNews) => prevNews.filter((item) => item._id !== id));
+    alert("News item deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting news:", error);
+    alert("Failed to delete news item");
+  }
+};
 
   const handleAddBlog = () => {
     setShowAddBlog(true);
@@ -834,11 +892,7 @@ const AdminPanel = () => {
     setBlogEntries((prev) => [newBlog, ...prev]); // add on top
   };
 
-  if (loading) {
-    return <p className="text-center text-gray-600">Loading blogs...</p>;
-  }
-
-
+ 
   /* Only render if active tab is 'institute'
 if (activeTab !== "institute") return null;*/
 
@@ -925,7 +979,7 @@ if (activeTab !== "institute") return null;*/
                                 onChange={(e) => {
                                   if (e.target.files.length > 0) {
                                     const file = e.target.files[0];
-                                    setSelectedFile(file); // ✅ store file in state
+                                    setSelectedFile(file); // store file in state
                                     setFormData({
                                       ...formData,
                                       imagename: file.name, // only for showing file name in UI
@@ -1007,10 +1061,11 @@ if (activeTab !== "institute") return null;*/
                               {carouselItems.map((item) => (
                                 <tr key={item._id} className="">
 
-                                  {/*{item.imagename}</td> same as DB Schema "itemname"*/}
+                                  {/*{item.imagename}</td> same as DB Schema i.e "itemname"*/}
                                   <td className="p-3">
                                     {item.imagename ? (
                                       <img
+
                                         src={`http://localhost:4001/Uploads/${item.imagename}`}
                                         alt={item.title}
                                         className="w-20 h-12 object-cover rounded border"
@@ -1181,12 +1236,18 @@ if (activeTab !== "institute") return null;*/
                 {/* News & Updates Tab */}
                 {activeTab === 'news' && (
                   <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-                    {showAddBlog ? (
-                      <AddNewBlog
-                        onBack={() => setShowAddBlog(false)}
-                        onSubmit={handleNewBlogSubmit}
-                      />
-                    ) : (
+                   {showAddBlog ? (
+  <AddNewBlog
+    onBack={() => setShowAddBlog(false)}
+    onSubmit={handleNewBlogSubmit}
+  />
+) : showEditBlog ? (
+  <AddNewBlog
+    editingEntry={editingEntry}   // pass the selected entry
+    onBack={() => setShowEditBlog(false)}
+    onSubmit={handleEditBlogSubmit} // new submit handler
+  />
+) : (
                       <>
 
                         <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-6">
@@ -1194,7 +1255,7 @@ if (activeTab !== "institute") return null;*/
                         </h2>
 
                         {/* Entries per page + Add new blog */}
-                        <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0">
                           <div className="flex items-center space-x-2">
                             <label
                               htmlFor="entries-dropdown"
@@ -1218,97 +1279,155 @@ if (activeTab !== "institute") return null;*/
 
                           <button
                             onClick={handleAddBlog}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition"
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-colors duration-200"
                           >
                             + Add New Blog
                           </button>
                         </div>
 
                         {/* Blog Table */}
-                        <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
+                        {/* Responsive Table for large screens and Card-based list for small screens */}
+                        {/* Table view for md and larger screens */}
+                        <div className="hidden md:block overflow-x-auto bg-white rounded-lg shadow-lg">
                           <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
                             <thead className="bg-gray-100">
                               <tr>
                                 <th className="px-6 py-3 text-center">#</th>
-                                <th className="px-6 py-3 text-center">newsTitle</th>
+                                <th className="px-6 py-3 text-left">newsTitle</th>
                                 <th className="px-6 py-3 text-center">newsImage</th>
-                                <th className="px-6 py-3 text-center">newsLink</th>
+                                <th className="px-6 py-3 text-left">newsLink</th>
                                 <th className="px-6 py-3 text-center">Created At</th>
-                                <th className="px-6 py-3 text-center">videoTitle</th>
-                                <th className="px-6 py-3 text-center">videoLink</th>
-                                <th className="px-6 py-3 text-center">Manage</th>
+                                <th className="px-6 py-3 text-left">videoTitle</th>
+                                <th className="px-6 py-3 text-left">videoLink</th>
+                                <th className="px-6 py-3 text-center rounded-tr-lg">Manage</th>
                               </tr>
                             </thead>
                             <tbody>
 
-                            
-                                {dummyData.map((entry, index) => (
-                                  <tr key={entry._id}>
-                                    <td className="px-6 py-4 text-center">{index + 1}</td>
-                                    <td className="px-6 py-4 text-center">{entry.newsTitle}</td>
-                                    <td className="px-6 py-4 text-center">
-                                      <img
-                                        src={entry.newsImage}
-                                        alt={entry.newsTitle}
-                                        className="w-20 h-20 sm:w-16 sm:h-16  object-cover mx-auto rounded"
-                                      />
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                      <a
-                                        href={entry.newsLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 hover:underline break-all"
+
+                              {news.map((entry, index) => (
+                                <tr key={entry._id}>
+                                  <td className="px-4 py-4 text-center">{entry.serialNumber}</td>
+                                  <td className="px4 py-4 break-words font-medium">{entry.newsTitle}</td>
+                                  <td className="px-4  py-4 text-center">
+                                    <img
+                                     src={`http://localhost:4001/Uploads/${entry.newsImage}`}
+                                      alt={entry.newsTitle}
+                                      className="w-20 h-20 sm:w-16 sm:h-16  object-cover mx-auto rounded"
+                                    />
+                                  </td>
+                                  <td className="px-6 py-4 text-center">
+                                    <a
+                                      href={entry.newsLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:underline"
+                                    >
+                                      {entry.newsLink}
+                                    </a>
+                                  </td>
+                                  <td className="px-4 py-4 text-center">
+                                    {new Date(entry.createdAt).toLocaleDateString()}
+                                  </td>
+                                  <td className="px-4 py-4 break-words">{entry.videoTitle}</td>
+                                  <td className="px-4 py-4 break-words">
+                                    <a
+                                      href={entry.videoLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:underline"
+                                    >
+                                      {entry.videoLink}
+                                    </a>
+                                  </td>
+                                  <td className="px-4 py-4 text-center">
+                                    <div className="flex items-center justify-center space-x-2">
+                                      {/*  Edit Button with Green Pen */}
+                                      <button
+                                        onClick={() => handlenewsEdit(entry._id)}
+                                        className="p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-600 hover:text-green-800 transition transform hover:scale-110"
                                       >
-                                        {entry.newsLink}
-                                      </a>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                      {new Date(entry.createdAt).toLocaleDateString()}
-                                    </td>
-                                    <td className="px-6 py-4 text-center">{entry.videoTitle}</td>
-                                    <td className="px-6 py-4 text-center">
-                                      <a
-                                        href={entry.videoLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 hover:underline break-all"
+                                        <PencilSquareIcon className="h-5 w-5" />
+                                      </button>
+
+                                      {/* Delete Button with Red Dustbin */}
+                                      <button
+                                        onClick={() => handlenewsDelete(entry._id)}
+                                        className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-800 transition transform hover:scale-110"
                                       >
-                                        {entry.videoLink}
-                                      </a>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                      <div className="flex items-center space-x-3">
-                                        {/*  Edit Button with Green Pen */}
-                                        <button
-                                          onClick={() => handleEdit(entry._id)}
-                                          className="p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-600 hover:text-green-800 transition transform hover:scale-110"
-                                        >
-                                          <PencilSquareIcon className="h-5 w-5" />
-                                        </button>
-
-                                        {/* Delete Button with Red Dustbin */}
-                                        <button
-                                          onClick={() => handleDelete(entry._id)}
-                                          className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-800 transition transform hover:scale-110"
-                                        >
-                                          <TrashIcon className="h-5 w-5" />
-                                        </button>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                ))}
+                                        <TrashIcon className="h-5 w-5" />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
 
 
 
 
-                              </tbody>
+                            </tbody>
                           </table>
+                        </div>
+                        {/* Card view of news and update table for mobile screens (flex-col) */}
+                        <div className="md:hidden flex flex-col space-y-4">
+                          {currentEntries.map((entry, index) => (
+                            <div key={entry._id} className="bg-white rounded-lg shadow-lg p-4 space-y-3">
+                              <div className="flex items-center space-x-3">
+                                <span className="text-lg font-bold text-gray-900">{indexOfFirstEntry + index + 1}.</span>
+                                <h3 className="text-sm font-semibold text-gray-800 break-words">{entry.newsTitle}</h3>
+                              </div>
+
+                              <div className="flex flex-col space-y-2">
+                                <div className="flex justify-center">
+                                  <img
+                                    src={entry.newsImage}
+                                    alt={entry.newsTitle}
+                                    className="w-32 h-32 object-cover rounded"
+                                    onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/150x150/CCCCCC/333333?text=Image+Not+Found"; }}
+                                  />
+                                </div>
+                                <div>
+                                  <span className="text-xs font-medium text-gray-500">Created At: </span>
+                                  <span className="text-xs text-gray-700">{new Date(entry.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <div>
+                                  <span className="text-xs font-medium text-gray-500">News Link: </span>
+                                  <a href={entry.newsLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs break-all">{entry.newsLink}</a>
+                                </div>
+                                {entry.videoTitle && (
+                                  <div>
+                                    <span className="text-xs font-medium text-gray-500">Video Title: </span>
+                                    <span className="text-xs text-gray-700">{entry.videoTitle}</span>
+                                  </div>
+                                )}
+                                {entry.videoLink && (
+                                  <div>
+                                    <span className="text-xs font-medium text-gray-500">Video Link: </span>
+                                    <a href={entry.videoLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs break-all">{entry.videoLink}</a>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-end space-x-2 mt-4">
+                                <button
+                                  onClick={() => handleEdit(entry._id)}
+                                  className="p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-600 hover:text-green-800 transition transform hover:scale-110"
+                                >
+                                  <PencilSquareIcon className="h-5 w-5" />
+                                </button>
+                                <button
+                                  onClick={() => handlenewsDelete(entry._id)}
+                                  className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-800 transition transform hover:scale-110"
+                                >
+                                  <TrashIcon className="h-5 w-5" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
 
                         {/* Pagination */}
-                        <div className="mt-6 flex justify-between items-center">
-                          <div className="text-sm text-gray-700 font-medium">
+                        <div className="mt-6 flex flex-col items-center justify-between sm:flex-row space-y-4 sm:space-y-0 ">
+                          <div className="text-sm text-gray-700 font-medium text-center sm:text-left">
                             Showing <b>{indexOfFirstEntry + 1}</b> to{" "}
                             <b>{indexOfFirstEntry + currentEntries.length}</b> of{" "}
                             <b>{totalEntries}</b> entries

@@ -7,9 +7,13 @@ const newsSchema = new mongoose.Schema({
   newsLink: { type: String, required: true },                   //  Link to full news
   videoTitle: { type: String },                                 //   video title
   videoLink: { type: String },                                  //   video link
-}, { timestamps: { createdAt: 'createdAt', updatedAt: false } });
+}, 
+{ timestamps: { createdAt: 'createdAt', updatedAt: false } 
+
+});
 
 
 const News = mongoose.model("News", newsSchema);
 
-export default News;
+export default News; 
+ 

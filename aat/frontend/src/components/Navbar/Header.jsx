@@ -19,8 +19,7 @@ const Header = () => {
                 //setInstitute(res.data);
                 setInstitute(Array.isArray(res.data) ? res.data[0] : res.data);
                 console.log("Fetched institute data in header.jsx:", res.data);
-                const interval = setInterval(fetchInstitute, 10000); // fetch every 2 seconds
-                return () => clearInterval(interval); // cleanup
+                
             } catch (err) {
                 console.error("Error fetching institute info:", err);
             }

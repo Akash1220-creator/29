@@ -1,174 +1,134 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import React, { useState, useEffect } from "react";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
-const AddNewBlog = () => {
-  const [title, setTitle] = useState('');
-  const [status, setStatus] = useState('Draft');
-  const [shortDescription, setShortDescription] = useState('');
-  const [longDescription, setLongDescription] = useState('');
-  const [coverImage, setCoverImage] = useState(null);
-  const [sliderImage, setSliderImage] = useState(null);
-  const [loading, setLoading] = useState(false);
+const AddNewBlog = ({ editingEntry, onBack, onSubmit }) => {
+  // Initialize state with editingEntry values or empty for new blog
+  const [newsTitle, setNewsTitle] = useState(editingEntry?.newsTitle || "");
+  const [newsContent, setNewsContent] = useState(editingEntry?.newsContent || "");
+  const [newsLink, setNewsLink] = useState(editingEntry?.newsLink || "");
+  const [videoTitle, setVideoTitle] = useState(editingEntry?.videoTitle || "");
+  const [videoLink, setVideoLink] = useState(editingEntry?.videoLink || "");
+  const [newsImage, setNewsImage] = useState(null); // file input
 
-  const handleSubmit = async (e) => {
+  // If editingEntry changes (e.g., user clicks edit on another entry), update form
+  useEffect(() => {
+    setNewsTitle(editingEntry?.newsTitle || "");
+    setNewsContent(editingEntry?.newsContent || "");
+    setNewsLink(editingEntry?.newsLink || "");
+    setVideoTitle(editingEntry?.videoTitle || "");
+    setVideoLink(editingEntry?.videoLink || "");
+    setNewsImage(null); // Reset file input
+  }, [editingEntry]);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
 
-    try {
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('status', status);
-      formData.append('shortDescription', shortDescription);
-      formData.append('longDescription', longDescription);
-      if (coverImage) formData.append('coverImage', coverImage);
-      if (sliderImage) formData.append('sliderImage', sliderImage);
+    // Prepare object to submit
+    const blogData = {
+      ...editingEntry, // keeps _id if editing
+      newsTitle,
+      newsContent,
+      newsLink,
+      videoTitle,
+      videoLink,
+      newsImage, // optional, can handle separately in backend
+    };
 
-      const response = await axios.post(
-        'api/blogs',
-        formData,
-        {
-          headers: {
-            "Accept": "application/json", // Optional
-          },
-        }
-      );
-    
-      alert('✅ Blog submitted successfully!');
-      console.log('Server response:', response.data);
-
-      /*Reset form
-      setTitle('');
-      setStatus('Draft');
-      setShortDescription('');
-      setLongDescription('');
-      setCoverImage(null);
-      setSliderImage(null);*/
-    } catch (error) {
-      console.error('Error submitting blog:', error);
-      alert('❌ Failed to submit blog. Check console for details.');
-    } finally {
-      setLoading(false);
-    }
+    onSubmit(blogData);
   };
 
-  // Full toolbar configuration
-  const fullToolbar = [
-    'heading', '|',
-    'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', '|',
-    'link', 'blockQuote', 'insertTable', 'mediaEmbed', 'imageUpload', '|',
-    'bulletedList', 'numberedList', 'todoList', '|',
-    'outdent', 'indent', '|',
-    'alignment', 'fontColor', 'fontBackgroundColor', 'fontSize', 'fontFamily', '|',
-    'horizontalLine', 'removeFormat', '|',
-    'undo', 'redo'
-  ];
-
   return (
-      <div className="space-y-6">
+    <div className="bg-white p-6 rounded-lg shadow-md max-w-3xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">
+        {editingEntry ? "Edit Blog" : "Add New Blog"}
+      </h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New Blog</h2>
-          <div className="space-y-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Title + Status */}
-              <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-                <div className="flex-1">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter blog title"
-                    className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-
-                <div className="flex-1">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="Draft">Draft</option>
-                    <option value="Published">Published</option>
-                    <option value="Archived">Archived</option>
-                  </select>
-                </div>
-              </div>
-            
-              {/* Short + Long Description */}
-              <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-                {/* Short Description */}
-                <div className="md:w-1/2 flex flex-col">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Short Description</label>
-                  <div className="border border-gray-300 rounded-lg overflow-hidden min-h-[200px]">
-                    <CKEditor
-                      editor={ClassicEditor}
-                      data={shortDescription}
-                      onChange={(event, editor) => setShortDescription(editor.getData())}
-                      config={{ toolbar: fullToolbar }}
-                    />
-                  </div>
-                </div>
-
-                {/* Long Description */}
-                <div className="md:w-1/2 flex flex-col">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Long Description</label>
-                  <div className="border border-gray-300 rounded-lg overflow-hidden min-h-[200px]">
-                    <CKEditor
-                      editor={ClassicEditor}
-                      data={longDescription}
-                      onChange={(event, editor) => setLongDescription(editor.getData())}
-                      config={{ toolbar: fullToolbar }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Cover + Slider Image */}
-              <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-                <div className="flex-1">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Cover Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setCoverImage(e.target.files[0])}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="flex-1">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Slider Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setSliderImage(e.target.files[0])}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex justify-center pt-4">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className={`w-full md:w-auto px-6 py-3 font-bold rounded-lg shadow-lg transition-all ${
-                    loading
-                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:scale-105'
-                  }`}
-                >
-                  {loading ? 'Submitting...' : 'Submit Blog'}
-                </button>
-              </div>
-            </form>
-          </div>
+          <label className="block text-sm font-medium text-gray-700">News Title</label>
+          <input
+            type="text"
+            value={newsTitle}
+            onChange={(e) => setNewsTitle(e.target.value)}
+            className="mt-1 block w-full border rounded-md p-2"
+            required
+          />
         </div>
-      </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">News Short Description</label>
+          <CKEditor
+            editor={ClassicEditor}
+            data={newsContent}
+            onChange={(event, editor) => setNewsContent(editor.getData())}
+          />
+        </div>
+          <div>
+          <label className="block text-sm font-medium text-gray-700">Full News Content</label>
+          <CKEditor
+            editor={ClassicEditor}
+            data={newsContent}
+            onChange={(event, editor) => setNewsContent(editor.getData())}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">News Link</label>
+          <input
+            type="text"
+            value={newsLink}
+            onChange={(e) => setNewsLink(e.target.value)}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Video Title</label>
+          <input
+            type="text"
+            value={videoTitle}
+            onChange={(e) => setVideoTitle(e.target.value)}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Video Link</label>
+          <input
+            type="text"
+            value={videoLink}
+            onChange={(e) => setVideoLink(e.target.value)}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">News Image</label>
+          <input
+            type="file"
+            onChange={(e) => setNewsImage(e.target.files[0])}
+            className="mt-1 block w-full"
+          />
+        </div>
+
+        <div className="flex space-x-4">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            {editingEntry ? "Update Blog" : "Add Blog"}
+          </button>
+          <button
+            type="button"
+            onClick={onBack}
+            className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

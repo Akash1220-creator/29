@@ -121,9 +121,10 @@ const visibleSlides = carouselData.filter(item => item.visible);
   };
 
   fetchCarousel(); // initial fetch
-  const interval = setInterval(fetchCarousel, 3000); // fetch every 5 sec
+  //polling not required
+  //const interval = setInterval(fetchCarousel, 3000); // fetch every 5 sec
 
-  return () => clearInterval(interval);
+  //return () => clearInterval(interval);
 }, []);
 
 
@@ -346,13 +347,11 @@ const [about, setAbout] = useState(null);
     // Initial fetch when the component mounts
     fetchAbout();
 
-    // Set up an interval to fetch data periodically (every 5 seconds)
-    const intervalId = setInterval(fetchAbout, 2000);
+    // polling not required
+    //const intervalId = setInterval(fetchAbout, 2000);
 
     // Cleanup function to clear the interval when the component unmounts
-    return () => {
-      clearInterval(intervalId);
-    };
+    //return () => {clearInterval(intervalId);};
 
   }, []); // The empty dependency array ensures this effect runs only once on mount
 
@@ -482,8 +481,7 @@ const [about, setAbout] = useState(null);
                  {visibleSlides
                   .map((item, index) => {
                    console.log("Slider item:", item);            // log the whole item
-                   console.log("Image URL:", item.imageUrl);       // log just the imageUrl
-           
+            
                    return (
                      <div
                        key={item._id}

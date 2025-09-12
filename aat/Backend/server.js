@@ -17,6 +17,8 @@ import aboutsectionRoutes from "./routes/aboutsectionRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import instituteRoutes from "./routes/instituteRoutes.js";
+import newsRoutes from "./routes/newssectionRoutes.js"
+import testimonialRoutes from "./routes/testimonialRoutes.js" 
 
 // Define __filename and __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -68,9 +70,11 @@ app.use(express.json());
 app.use("/api/blogs", addnewblog);
 // route
 
-// ✅ news and update section Routes
-app.use("/api/news", newsRoutes);
+//Mount newsupdates routes
 
+app.use("/api/news", newsRoutes);
+// Use testimonial routes
+app.use("/api/testimonials", testimonialRoutes);
 // 2. Use Routes
 app.use("/api/carousel", carouselRoutes);
 // use Routes for about section
