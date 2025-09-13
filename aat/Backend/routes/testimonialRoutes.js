@@ -5,42 +5,37 @@ import Testimonial from "../models/testimonial.js";
 
 const router = express.Router();
 
-//  Configure Multer storage
+ 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "Uploads/"); // save files in Uploads folder
+  destination: function (req, file, cb) {
+    cb(null, 'Uploads/');
   },
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      Date.now() + "-" + file.originalname.replace(/\s+/g, "_") // unique filename
-    );
-  },
-});
-
-const upload = multer({ storage });
-
-
-//  Create a new testimonial with image
-router.post("/", upload.single("profileImage"), async (req, res) => {
-  try {
-    const { name, designation, message } = req.body;
-    console.log("req.body:", req.body); 
-    console.log("req.file:", req.file);
-
-    const newTestimonial = new Testimonial({
-      profileImage: req.file ? `/Uploads/${req.file.filename}` : null, // store path
-      name,
-      designation,
-      message,
-    });
-
-    await newTestimonial.save();
-    res.status(201).json(newTestimonial);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
   }
 });
+
+const upload = multer({ storage: storage });
+
+// Single file upload
+router.post('/', upload.single('profileImage'), async (req, res) => {
+  console.log("req.body:", req.body);
+  console.log("req.file:", req.file);
+
+  try {
+    const testimonial = new Testimonial({
+      name: req.body.name,
+      designation: req.body.designation,
+      message: req.body.message,
+      profileImage: req.file ? req.file.filename : null
+    });
+    await testimonial.save();
+    res.json(testimonial);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 
 
 //  Get all testimonials

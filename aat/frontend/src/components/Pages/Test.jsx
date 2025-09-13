@@ -1,225 +1,227 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import AddNewBlog from "../Pages/AddNewBlog";
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { PencilSquareIcon, TrashIcon, ClipboardIcon } from "@heroicons/react/24/solid";
 
 const AdminPanel = () => {
-  const [news, setNews] = useState([]);
-  const [showAddBlog, setShowAddBlog] = useState(false);
-  const [showEditBlog, setShowEditBlog] = useState(false);
-  const [editingEntry, setEditingEntry] = useState(null);
+  // Subscribers State
+  const [subscribers, setSubscribers] = useState([]);
+  const [editingSubscriber, setEditingSubscriber] = useState(null);
+  const [subscriberData, setSubscriberData] = useState({
+    whatsapp: "",
+    email: ""
+  });
+  const [showSubscriberForm, setShowSubscriberForm] = useState(false);
 
-  // Pagination & entries
-  const [entriesToShow, setEntriesToShow] = useState(5);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const indexOfLastEntry = currentPage * entriesToShow;
-  const indexOfFirstEntry = indexOfLastEntry - entriesToShow;
-  const currentEntries = news.slice(indexOfFirstEntry, indexOfLastEntry);
-  const totalEntries = news.length;
-  const totalPages = Math.ceil(totalEntries / entriesToShow);
-
+  // Fetch subscribers on mount
   useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const response = await axios.get("/api/news");
-        setNews(response.data);
-      } catch (error) {
-        console.error("Error fetching news:", error);
-      }
-    };
-    fetchNews();
+    fetchSubscribers();
   }, []);
 
-  const handleAddBlog = () => {
-    setShowAddBlog(true);
-  };
-
-  const handleDropdownChange = (e) => {
-    setEntriesToShow(Number(e.target.value));
-  };
-
-  const handlePageChange = (page) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
-  };
-
-  const handleEdit = (id) => {
-    const entryToEdit = news.find((n) => n._id === id);
-    setEditingEntry(entryToEdit);
-    setShowEditBlog(true);
-  };
-
-  const handleNewBlogSubmit = (newEntry) => {
-    setNews([newEntry, ...news]);
-    setShowAddBlog(false);
-  };
-
-  const handleEditBlogSubmit = async (updatedEntry) => {
+  const fetchSubscribers = async () => {
     try {
-      // Update in backend
-      await axios.put(`/api/news/${updatedEntry._id}`, updatedEntry);
-
-      // Update local state
-      setNews(news.map((n) => (n._id === updatedEntry._id ? updatedEntry : n)));
-
-      // Close edit form
-      setShowEditBlog(false);
-      setEditingEntry(null);
-    } catch (error) {
-      console.error("Error updating entry:", error);
+      console.log("Fetching subscribers...");
+      const res = await axios.get("api/subscribers");
+      console.log("Data received:", res.data);
+      setSubscribers(res.data);
+    } catch (err) {
+      console.error("Error fetching subscribers:", err);
     }
   };
 
-  const handlenewsDelete = async (id) => {
+  // Delete subscriber
+  const deleteSubscriber = async (id) => {
     try {
-      await axios.delete(`/api/news/${id}`);
-      setNews(news.filter((n) => n._id !== id));
-    } catch (error) {
-      console.error("Error deleting news:", error);
+      await axios.delete(`api/subscribers/${id}`);
+      setSubscribers(subscribers.filter((s) => s._id !== id));
+    } catch (err) {
+      console.error("Error deleting subscriber:", err);
+    }
+  };
+
+  // Copy to clipboard
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    alert(`Copied: ${text}`);
+  };
+
+  // Open edit form
+  const openSubscriberEditForm = (subscriber) => {
+    setEditingSubscriber(subscriber);
+    setSubscriberData({
+      whatsapp: subscriber.whatsapp,
+      email: subscriber.email
+    });
+    setShowSubscriberForm(true);
+  };
+
+  // Handle input change
+  const handleSubscriberChange = (e) => {
+    const { name, value } = e.target;
+    setSubscriberData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Cancel form
+  const handleSubscriberCancel = () => {
+    setShowSubscriberForm(false);
+    setEditingSubscriber(null);
+    setSubscriberData({ whatsapp: "", email: "" });
+  };
+
+  // Submit form
+  const handleSubscriberSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingSubscriber) {
+        // Update subscriber
+        await axios.put(
+          `api/subscribers/${editingSubscriber._id}`,
+          subscriberData
+        );
+        setSubscribers((prev) =>
+          prev.map((s) =>
+            s._id === editingSubscriber._id ? { ...s, ...subscriberData } : s
+          )
+        );
+      } else {
+        // Add new subscriber
+        const res = await axios.post("api/subscribers", subscriberData);
+        setSubscribers((prev) => [...prev, res.data]);
+      }
+      // Reset form
+      handleSubscriberCancel();
+    } catch (err) {
+      console.error("Error saving subscriber:", err);
     }
   };
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      {/* Show Add or Edit Form */}
-      {showAddBlog ? (
-        <AddNewBlog
-          onBack={() => setShowAddBlog(false)}
-          onSubmit={handleNewBlogSubmit}
-        />
-      ) : showEditBlog ? (
-        <AddNewBlog
-          editingEntry={editingEntry} // Pass current entry for editing
-          onBack={() => setShowEditBlog(false)}
-          onSubmit={handleEditBlogSubmit}
-        />
+    <div className="max-w-7xl mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-4">Subscribers List</h2>
+
+      {/* Add / Edit Subscriber Form */}
+      {showSubscriberForm && (
+        <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+          <h3 className="text-lg font-semibold mb-4">
+            {editingSubscriber ? "Edit Subscriber" : "Add New Subscriber"}
+          </h3>
+          <form onSubmit={handleSubscriberSubmit} className="space-y-4">
+            <input
+              type="text"
+              name="whatsapp"
+              value={subscriberData.whatsapp}
+              onChange={handleSubscriberChange}
+              placeholder="WhatsApp Number"
+              className="w-full border p-2 rounded"
+              required
+            />
+            <input
+              type="email"
+              name="email"
+              value={subscriberData.email}
+              onChange={handleSubscriberChange}
+              placeholder="Email Address"
+              className="w-full border p-2 rounded"
+              required
+            />
+            <div className="flex space-x-2">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                {editingSubscriber ? "Update" : "Add"}
+              </button>
+              <button
+                type="button"
+                onClick={handleSubscriberCancel}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Show Subscribers Table */}
+      {subscribers.length === 0 ? (
+        <p className="text-gray-600">No subscribers found.</p>
       ) : (
-        <>
-          <div className="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0">
-            <div className="flex items-center space-x-2">
-              <label
-                htmlFor="entries-dropdown"
-                className="text-gray-700 font-medium"
-              >
-                Show entries:
-              </label>
-              <select
-                id="entries-dropdown"
-                className="border border-gray-300 rounded-md p-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={entriesToShow}
-                onChange={handleDropdownChange}
-              >
-                {[5, 10].map((num) => (
-                  <option key={num} value={num}>
-                    {num}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <div className="overflow-x-auto bg-white rounded-lg shadow-md">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-100">
+              <tr className="text-left text-sm font-semibold uppercase tracking-wider">
+                <th className="p-3">#</th>
+                <th className="p-3">WhatsApp</th>
+                <th className="p-3">Email</th>
+                <th className="p-3">Subscribed At</th>
+                <th className="p-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {subscribers.map((subscriber, index) => (
+                <tr key={subscriber._id} className="hover:bg-gray-50">
+                  <td className="p-3">{index + 1}</td>
 
-            <button
-              onClick={handleAddBlog}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-colors duration-200"
-            >
-              + Add New Blog
-            </button>
-          </div>
+                  {/* WhatsApp */}
+                  <td className="p-3">
+                    <div className="flex items-center space-x-2">
+                      <span>{subscriber.whatsapp}</span>
+                      <button
+                        onClick={() => handleCopy(subscriber.whatsapp)}
+                        className="p-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-600"
+                        title="Copy WhatsApp"
+                      >
+                        <ClipboardIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
 
-          {/* Table for desktop */}
-          <div className="hidden md:block overflow-x-auto bg-white rounded-lg shadow-lg">
-            <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-6 py-3 text-center">#</th>
-                  <th className="px-6 py-3 text-left">newsTitle</th>
-                  <th className="px-6 py-3 text-center">newsImage</th>
-                  <th className="px-6 py-3 text-left">newsLink</th>
-                  <th className="px-6 py-3 text-center">Created At</th>
-                  <th className="px-6 py-3 text-left">videoTitle</th>
-                  <th className="px-6 py-3 text-left">videoLink</th>
-                  <th className="px-6 py-3 text-center rounded-tr-lg">Manage</th>
+                  {/* Email */}
+                  <td className="p-3">
+                    <div className="flex items-center space-x-2">
+                      <span>{subscriber.email}</span>
+                      <button
+                        onClick={() => handleCopy(subscriber.email)}
+                        className="p-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-600"
+                        title="Copy Email"
+                      >
+                        <ClipboardIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+
+                  {/* Subscribed At */}
+                  <td className="p-3">
+                    {new Date(subscriber.createdAt).toLocaleString()}
+                  </td>
+
+                  {/* Actions */}
+                  <td className="p-3">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => openSubscriberEditForm(subscriber)}
+                        className="p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-600 hover:text-green-800 transition transform hover:scale-110"
+                        title="Edit Subscriber"
+                      >
+                        <PencilSquareIcon className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteSubscriber(subscriber._id)}
+                        className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-800 transition transform hover:scale-110"
+                        title="Delete Subscriber"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {currentEntries.map((entry, index) => (
-                  <tr key={entry._id}>
-                    <td className="px-4 py-4 text-center">
-                      {indexOfFirstEntry + index + 1}
-                    </td>
-                    <td className="px4 py-4 break-words font-medium">
-                      {entry.newsTitle}
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      <img
-                        src={`http://localhost:4001/Uploads/${entry.newsImage}`}
-                        alt={entry.newsTitle}
-                        className="w-20 h-20 sm:w-16 sm:h-16 object-cover mx-auto rounded"
-                      />
-                    </td>
-                    <td className="px-6 py-4 text-center break-all">
-                      {entry.newsLink}
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      {new Date(entry.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-4 break-words">{entry.videoTitle}</td>
-                    <td className="px-4 py-4 break-words">{entry.videoLink}</td>
-                    <td className="px-4 py-4 text-center">
-                      <div className="flex items-center justify-center space-x-2">
-                        <button
-                          onClick={() => handleEdit(entry._id)}
-                          className="p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-600 hover:text-green-800 transition transform hover:scale-110"
-                        >
-                          <PencilSquareIcon className="h-5 w-5" />
-                        </button>
-
-                        <button
-                          onClick={() => handlenewsDelete(entry._id)}
-                          className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-800 transition transform hover:scale-110"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className="mt-6 flex flex-col items-center justify-between sm:flex-row space-y-4 sm:space-y-0 ">
-            <div className="text-sm text-gray-700 font-medium text-center sm:text-left">
-              Showing <b>{indexOfFirstEntry + 1}</b> to <b>{indexOfFirstEntry + currentEntries.length}</b> of <b>{totalEntries}</b> entries
-            </div>
-            <div>
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="px-3 py-1 border rounded-l-md"
-              >
-                Prev
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <button
-                  key={i + 1}
-                  onClick={() => handlePageChange(i + 1)}
-                  className={`px-3 py-1 border ${currentPage === i + 1 ? "bg-blue-100" : "bg-white"}`}
-                >
-                  {i + 1}
-                </button>
               ))}
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 border rounded-r-md"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        </>
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

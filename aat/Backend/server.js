@@ -19,6 +19,9 @@ import { fileURLToPath } from "url";
 import instituteRoutes from "./routes/instituteRoutes.js";
 import newsRoutes from "./routes/newssectionRoutes.js"
 import testimonialRoutes from "./routes/testimonialRoutes.js" 
+import subscribeRoutes from "./routes/subscribeRoutes.js";
+
+
 
 // Define __filename and __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -39,6 +42,9 @@ app.post("/api/auth/logout", logout);*/
 
 app.use(express.json());
 app.use("/api/auth", authRoutes); // all /signup, /login, /logout routes go here
+
+
+app.use("/api/subscribers", subscribeRoutes);//subscribe us
 
 //connection with frontend ======CORS======
 app.use(cookieParser());

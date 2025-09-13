@@ -84,20 +84,22 @@ export default function MainPage() {
     };
 
     //subscribe section
-    const [whatsapp, setWhatsapp] = useState('');
-  const [email, setEmail] = useState('');
+    const [whatsapp, setWhatsapp] = useState("");
+  const [email, setEmail] = useState("");
 
   const handleSubscribe = (e) => {
     e.preventDefault();
-    // This is where you would typically handle the form submission,
-    // like sending the data to an API or a database.
-    console.log('Submitted WhatsApp:', whatsapp);
-    console.log('Submitted Email:', email);
-    // For this example, we'll just clear the fields.
-    setWhatsapp('');
-    setEmail('');
-     // In a real application, you might show a success message to the user.
+    console.log("Submitted WhatsApp:", whatsapp); // ✅ includes +countryCode + number
+    console.log("Submitted Email:", email);
+
+    // ✅ Clear fields after submission
+    setWhatsapp("");
+    setEmail("");
+
+    // ✅ Send data to backend (axios/fetch)
+    // axios.post("/api/subscribe", { whatsapp, email })
   };
+
   //slider or carousel
 const [carouselData, setCarouselData] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -935,7 +937,7 @@ const [about, setAbout] = useState(null);
           </div>
         </div>
         </div>
-        
+         
         {/* Quick Inquiry Section Form */}  
           <div className="font-sans antialiased bg-white text-gray-800">
             {/* The fixed inquiry form container */}
